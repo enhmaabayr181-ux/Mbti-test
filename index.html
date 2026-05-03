@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI Зан Чанарын Тест</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mongolian&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --accent: #7c6dfa;
+    --accent2: #fa6d9a;
+    --accent3: #6dfacc;
+    --text: #e8e8f0;
+    --muted: #6b6b85;
+    --glow: rgba(124, 109, 250, 0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 20% 20%, rgba(124,109,250,0.07) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(250,109,154,0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(109,250,204,0.03) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 8vw, 72px);
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    margin-bottom: 32px;
+    animation: fadeIn 0.6s 0.3s both;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .progress-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .progress-count {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 0 12px var(--glow);
+  }
+
+  /* QUESTION CARD */
+  #question-section { display: block; }
+  #result-section { display: none; }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.5s cubic-bezier(0.4,0,0.2,1) both;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  }
+
+  .question-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .question-text {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 32px;
+  }
+
+  /* OPTIONS */
+  .options {
+    display: grid;
+    gap: 12px;
+  }
+
+  .option {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 400;
+    text-align: left;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .option:hover {
+    border-color: var(--accent);
+    color: var(--text);
+    background: rgba(124,109,250,0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(124,109,250,0.15);
+  }
+
+  .option.selected-a {
+    border-color: var(--accent);
+    background: rgba(124,109,250,0.12);
+    color: var(--text);
+    box-shadow: 0 0 20px rgba(124,109,250,0.2);
+  }
+
+  .option.selected-b {
+    border-color: var(--accent2);
+    background: rgba(250,109,154,0.12);
+    color: var(--text);
+    box-shadow: 0 0 20px rgba(250,109,154,0.2);
+  }
+
+  .option-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .option:hover .option-dot { border-color: var(--accent); }
+  .option.selected-a .option-dot { border-color: var(--accent); background: var(--accent); }
+  .option.selected-b .option-dot { border-color: var(--accent2); background: var(--accent2); }
+
+  .option-dot::after {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .option.selected-a .option-dot::after,
+  .option.selected-b .option-dot::after { opacity: 1; }
+
+  /* NAV */
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--muted); color: var(--text); }
+  .btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    box-shadow: 0 4px 20px rgba(124,109,250,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,109,250,0.4); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* RESULT */
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: scaleIn 0.6s cubic-bezier(0.4,0,0.2,1) both;
+  }
+
+  .result-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  }
+
+  .result-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(124,109,250,0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .mbti-type {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 15vw, 100px);
+    letter-spacing: 8px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--accent3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .mbti-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .mbti-desc {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 500px;
+    margin: 0 auto 32px;
+    position: relative;
+  }
+
+  /* DIMENSION BARS */
+  .dimensions {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 32px;
+    position: relative;
+    text-align: left;
+  }
+
+  .dim-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dim-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .dim-label.left { color: var(--accent); }
+  .dim-label.right { color: var(--accent2); }
+
+  .dim-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .dim-fill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1) 0.3s;
+  }
+
+  .traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .trait-tag {
+    background: rgba(124,109,250,0.12);
+    border: 1px solid rgba(124,109,250,0.3);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-restart {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+  }
+  .btn-restart:hover { border-color: var(--accent); color: var(--accent); }
+
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="badge">🧠 Зан Чанарын Судалгаа</div>
+    <h1>MBTI TEST</h1>
+    <p class="subtitle">Өөрийн зан чанарын төрлийг олж мэдээрэй</p>
+  </header>
+
+  <!-- QUESTION SECTION -->
+  <div id="question-section">
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-label">Явц</span>
+        <span class="progress-count" id="prog-count">1 / 20</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="prog-fill" style="width:5%"></div>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <span class="question-num" id="q-num">АСУУЛТ 01</span>
+      <p class="question-text" id="q-text"></p>
+      <div class="options" id="options-wrap"></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" id="btn-prev" onclick="prevQ()" disabled>← Өмнөх</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Дараах →</button>
+    </div>
+  </div>
+
+  <!-- RESULT SECTION -->
+  <div id="result-section">
+    <div class="result-card">
+      <div class="result-glow"></div>
+      <div class="mbti-type" id="res-type">INFJ</div>
+      <div class="mbti-title" id="res-title"></div>
+      <p class="mbti-desc" id="res-desc"></p>
+      <div class="dimensions" id="res-dims"></div>
+      <div class="traits" id="res-traits"></div>
+      <button class="btn-restart" onclick="restart()">↺ Дахин тестлэх</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  { text: "Та ихэвчлэн хаана энерги авдаг вэ?", a: "Хүмүүстэй харилцаж, нийгмийн орчинд байхдаа", b: "Ганцаараа байж, дотоод бодолдоо автахдаа", dim: "EI" },
+  { text: "Та шинэ хүнтэй уулзахад…", a: "Идэвхтэй ярилцаж, танилцах дуртай", b: "Нам гүм ажиглаж, аажмаар нээгддэг", dim: "EI" },
+  { text: "Та мэдээллийг хэрхэн хүлээн авдаг вэ?", a: "Тодорхой баримт, мэдрэхүйн туршлагаас", b: "Ойлголт, таамаг, загвараас", dim: "SN" },
+  { text: "Та аль нь илүү ойр санагддаг вэ?", a: "Одоо байгаа бодит байдал чухал", b: "Ирээдүйн боломж, санаанууд чухал", dim: "SN" },
+  { text: "Та шийдвэр гаргахдаа юуг илүү ашигладаг вэ?", a: "Логик болон объектив дүн шинжилгээ", b: "Хувийн үнэт зүйл болон бусдын мэдрэмж", dim: "TF" },
+  { text: "Маргааны үед та ямар байдаг вэ?", a: "Үнэнийг тогтоох нь харилцааг хадгалахаас чухал", b: "Харилцааг хэвийн байлгах нь илүү чухал", dim: "TF" },
+  { text: "Та ажил амьдралаа хэрхэн зохион байгуулдаг вэ?", a: "Төлөвлөгөөтэй, дараалалтай, урьдчилан тодорхойлсон", b: "Уян хатан, нөхцөл байдалд тохируулан, аяндаа", dim: "JP" },
+  { text: "Ажил дуусгах хугацааны талаар та ямар байдаг вэ?", a: "Цаг хугацааг чанд баримтлан дуусгадаг", b: "Сүүлийн мөчид шахалтаар илүү сайн ажилладаг", dim: "JP" },
+  { text: "Олон хүний дунд байхад та ямар мэдрэмж төрдөг вэ?", a: "Сэргэж, хөгжилтэй байдаг", b: "Ядарч, ганцаараа байхыг хүсдэг", dim: "EI" },
+  { text: "Та ямар даалгавар илүү дуртай вэ?", a: "Тодорхой зааварчилгаатай, практик даалгавар", b: "Хийсвэр, бүтээлч, нээлттэй даалгавар", dim: "SN" },
+  { text: "Та хэнийг шүүмжлэхдээ…", a: "Шулуун, тодорхой хэлдэг", b: "Болгоомжтой, нөхцөл байдлыг тооцон хэлдэг", dim: "TF" },
+  { text: "Таны өрөө, ширээ хэрхэн байдаг вэ?", a: "Цэгцтэй, зохион байгуулалттай", b: "Бага зэрэг эмх замбараагүй, гэхдээ ажилладаг", dim: "JP" },
+  { text: "Шинэ мэдлэг олж авахдаа та хэрхэн сурдаг вэ?", a: "Нарийн, алхам алхмаар жишээ дээр", b: "Нийт зурагнаас эхлэн гүнзгийрч орддог", dim: "SN" },
+  { text: "Та бусдын асуудлыг сонсохдоо…", a: "Шийдлийг санал болгодог", b: "Мэдрэмжийг нь ойлгохыг хичээдэг", dim: "TF" },
+  { text: "Аялал руу явахын өмнө та…", a: "Бүх зүйлийг нарийн төлөвлөдөг", b: "Ерөнхий чиглэл тогтоогоод аяндаа явдаг", dim: "JP" },
+  { text: "Та ихэвчлэн яриа эхлүүлдэг үү?", a: "Тийм, бараг л надаас эхэлдэг", b: "Үгүй, хэн нэгэн эхэлбэл нэгддэг", dim: "EI" },
+  { text: "Хамгийн итгэлтэй мэдээлэл юу вэ?", a: "Туршиж нотлогдсон, тодорхой факт", b: "Зөн совин болон нарийн харагдахгүй холбоо", dim: "SN" },
+  { text: "Та хийхэд хэцүү үнэн хэлж чадах уу?", a: "Тийм, шаардлагатай бол заавал хэлдэг", b: "Хэцүү, хүнийг гомдоохоос зайлсхийдэг", dim: "TF" },
+  { text: "Таны хамгийн тохь тухтай орчин юу вэ?", a: "Бүх зүйл тодорхой, урьдчилан мэдэгдсэн байх", b: "Гэнэтийн өөрчлөлтөд нээлттэй, уян хатан байх", dim: "JP" },
+  { text: "Та ихэвчлэн юуны талаар бодож явдаг вэ?", a: "Тодорхой нөхцөл байдал, практик асуудал", b: "Ойлголт, утга учир, хэв загвар", dim: "SN" },
+];
+
+const types = {
+  INTJ: { title: "Стратегч", desc: "Хүчтэй зорилготой, бие даасан сэтгэгч. Уян хатан стратеги боловсруулж, зорилгодоо хүрэхийн тулд тууштай ажилладаг.", traits: ["Стратегч", "Бие даасан", "Тодорхой зорилготой", "Аналитик"] },
+  INTP: { title: "Сэтгэгч", desc: "Логик дүн шинжилгээнд гарамгай, нарийн онолчид. Мэдлэг эрэлхийлж, ойлгомжгүй зүйлийг задлан шинжлэх дуртай.", traits: ["Логик", "Аналитик", "Бүтээлч", "Бие даасан"] },
+  ENTJ: { title: "Командлагч", desc: "Байгалиасаа удирдагч. Шийдвэртэй, стратегийн сэтгэлгээтэй, бусдыг зорилго руу чиглүүлэх чадвартай.", traits: ["Удирдагч", "Шийдвэртэй", "Стратегч", "Итгэлтэй"] },
+  ENTP: { title: "Маргаанч", desc: "Оюунлаг шийдэл хайдаг шинийг санаачлагч. Хэцүү асуудлуудыг задлах, шинэ өнцгөөс харах дуртай.", traits: ["Бүтээлч", "Маргаанч", "Зохиомжтой", "Өдөөлттэй"] },
+  INFJ: { title: "Зүгийнх", desc: "Ховор тохиолддог хамгийн идеалист зан чанар. Гүн утга учир, нийгэмд эерэг өөрчлөлт авчрахын төлөө тэмцдэг.", traits: ["Идеалист", "Гүн сэтгэлтэй", "Зориулагдсан", "Нарийн ойлголттой"] },
+  INFP: { title: "Зуучлагч", desc: "Шинэлэг санаа, гүнзгий үнэт зүйлтэй хүмүүс. Ертөнцийг илүү сайн газар болгохыг хүсдэг хийсвэр сэтгэгч.", traits: ["Идеалист", "Бүтээлч", "Нэр хүнд", "Уян хатан"] },
+  ENFJ: { title: "Нийгмийн Удирдагч", desc: "Харизматик, урам зоригтой удирдагч. Бусдыг хөгжүүлэх, хамт олныг нэгтгэхэд байгалийн авьяастай.", traits: ["Харизматик", "Ятгагч", "Зохион байгуулагч", "Гэгээнтэн"] },
+  ENFP: { title: "Кампанит Ажилтан", desc: "Хөгжилтэй, бүтээлч, нийгмийн зан чанарт хүмүүс. Амьдрал дахь боломж, холбоог харж, урам зоригийг авчирдаг.", traits: ["Уян хатан", "Хүмүүнлэг", "Бүтээлч", "Итгэмжит"] },
+  ISTJ: { title: "Логист", desc: "Тогтвортой, найдвартай, нарийн ажилдаг хүмүүс. Үүргээ биелүүлэх, уламжлалыг хүндэтгэх нь тэдний үнэт зүйл.", traits: ["Найдвартай", "Хариуцлагатай", "Тогтвортой", "Практик"] },
+  ISFJ: { title: "Хамгаалагч", desc: "Халуун дулаан, хамгаалалтад анхааралтай. Хайртай хүмүүсийнхээ төлөө хичээн зүтгэдэг тэвчээртэй хүмүүс.", traits: ["Хамгаалагч", "Халуун дулаан", "Анхааралтай", "Үнэнч"] },
+  ESTJ: { title: "Захирагч", desc: "Уламжлал, дэг журмын хамгаалагч. Хамт олноо нэгтгэж, нийтлэг зорилгод хүрэхэд маш сайн удирдагч.", traits: ["Зохион байгуулагч", "Дэг журамтай", "Удирдагч", "Үүрэгч"] },
+  ESFJ: { title: "Консул", desc: "Маш нийгэмч, халуун дулаан хүмүүс. Бусдаа дэмжиж, хамт олныг хамгаалах нь тэдний хамгийн чухал зүйл.", traits: ["Нийгэмч", "Дэмжигч", "Тогтвортой", "Халуун дулаан"] },
+  ISTP: { title: "Виртуоз", desc: "Хэрэглэгдэх зүйлийг практикаар судлах дуртай. Техникийн асуудлыг шийдвэрлэхэд маш ур чадвартай.", traits: ["Практик", "Техникийн", "Бие даасан", "Анхааралтай"] },
+  ISFP: { title: "Адал Явдалтан", desc: "Уян хатан, зохиомжтой, нэр хүнд. Дэлхийг судлаж, шинэ туршлага хайж явдаг чөлөөт сүнстэй хүмүүс.", traits: ["Уян хатан", "Халуун", "Бүтээлч", "Бие даасан"] },
+  ESTP: { title: "Бизнесмен", desc: "Гайхалтай ухаалаг, энергитэй, маш их ажиглах чадвартай. Тэд орчин байдалд хурдан дасан зохицдог.", traits: ["Ажиглагч", "Энергитэй", "Прагматик", "Хурдан"] },
+  ESFP: { title: "Жүжигчин", desc: "Хамгийн өдөөлттэй ба бусдыг баяр хөөртэй болгогч. Амьдрал, урлаг, хоол, байгаль зэрэгт дуртай.", traits: ["Хөгжилтэй", "Нийгэмч", "Аяндаа", "Энергитэй"] }
+};
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+
+function render() {
+  const q = questions[current];
+  document.getElementById('q-num').textContent = `АСУУЛТ ${String(current+1).padStart(2,'0')}`;
+  document.getElementById('q-text').textContent = q.text;
+  const wrap = document.getElementById('options-wrap');
+  wrap.innerHTML = `
+    <button class="option ${answers[current]==='A'?'selected-a':''}" onclick="choose('A')">
+      <span class="option-dot"></span><span>${q.a}</span>
+    </button>
+    <button class="option ${answers[current]==='B'?'selected-b':''}" onclick="choose('B')">
+      <span class="option-dot"></span><span>${q.b}</span>
+    </button>
+  `;
+  document.getElementById('prog-count').textContent = `${current+1} / ${questions.length}`;
+  document.getElementById('prog-fill').style.width = `${((current+1)/questions.length)*100}%`;
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = answers[current] === null;
+  document.getElementById('btn-next').textContent = current === questions.length-1 ? 'Үр дүн харах ✨' : 'Дараах →';
+}
+
+function choose(v) {
+  answers[current] = v;
+  render();
+}
+
+function nextQ() {
+  if (answers[current] === null) return;
+  if (current === questions.length - 1) { showResult(); return; }
+  current++;
+  render();
+}
+
+function prevQ() {
+  if (current > 0) { current--; render(); }
+}
+
+function calcType() {
+  const score = { E:0,I:0, S:0,N:0, T:0,F:0, J:0,P:0 };
+  questions.forEach((q,i) => {
+    if (!answers[i]) return;
+    const dim = q.dim;
+    const letters = dim.split('');
+    if (answers[i] === 'A') score[letters[0]]++;
+    else score[letters[1]]++;
+  });
+  const ei = score.E >= score.I ? 'E':'I';
+  const sn = score.S >= score.N ? 'S':'N';
+  const tf = score.T >= score.F ? 'T':'F';
+  const jp = score.J >= score.P ? 'J':'P';
+  return { type: ei+sn+tf+jp, score };
+}
+
+function showResult() {
+  const { type, score } = calcType();
+  const info = types[type] || types['INFJ'];
+  document.getElementById('question-section').style.display = 'none';
+  document.getElementById('result-section').style.display = 'block';
+  document.getElementById('res-type').textContent = type;
+  document.getElementById('res-title').textContent = info.title;
+  document.getElementById('res-desc').textContent = info.desc;
+
+  const total = questions.filter(q=>q.dim==='EI').length;
+  const ePct = Math.round((score.E / (score.E+score.I||1))*100);
+  const sPct = Math.round((score.S / (score.S+score.N||1))*100);
+  const tPct = Math.round((score.T / (score.T+score.F||1))*100);
+  const jPct = Math.round((score.J / (score.J+score.P||1))*100);
+
+  document.getElementById('res-dims').innerHTML = `
+    ${dimRow('E','I',ePct,'#7c6dfa','#fa6d9a')}
+    ${dimRow('S','N',sPct,'#7c6dfa','#fa6d9a')}
+    ${dimRow('T','F',tPct,'#7c6dfa','#fa6d9a')}
+    ${dimRow('J','P',jPct,'#7c6dfa','#fa6d9a')}
+  `;
+
+  document.getElementById('res-traits').innerHTML = info.traits.map(t=>`<span class="trait-tag">${t}</span>`).join('');
+}
+
+function dimRow(a, b, pct, c1, c2) {
+  const grad = `linear-gradient(90deg, ${c1} ${pct}%, ${c2} ${pct}%)`;
+  return `<div class="dim-row">
+    <span class="dim-label left">${a}</span>
+    <div class="dim-track"><div class="dim-fill" style="width:${pct}%;background:${c1}"></div></div>
+    <span class="dim-label right">${b}</span>
+  </div>`;
+}
+
+function restart() {
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  document.getElementById('result-section').style.display = 'none';
+  document.getElementById('question-section').style.display = 'block';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
